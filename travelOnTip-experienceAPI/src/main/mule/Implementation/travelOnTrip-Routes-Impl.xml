@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy" doc:id="46077c99-e778-4469-ad63-752c36bf55a5" objectStore="Object_store" keyGenerationExpression='#[vars.transportCompany ++ vars.transportType ++ "Routes"]'/>
+	<sub-flow name="getRoutes-TravelOnTip" doc:id="63770fc3-ffcb-4efa-afc2-5ee99cfad01f" >
+		<set-variable value="#[&quot;/api/&quot; ++ (vars.transportType default &quot;Bus&quot;) ++ p('http.requester.travelOnTip.routesPath')]" doc:name="system path" doc:id="93a8bfc9-86d9-46dd-94bb-d7f69847c7df" variableName="resourcePath" />
+		<ee:cache doc:name="Cache" doc:id="839062ce-1e23-41f7-b59a-103c55495819" cachingStrategy-ref="Caching_Strategy">
+					<http:request method="GET" doc:name="Request to system" doc:id="3036a167-5d0e-42b9-9a97-7f6b9ada87cc" config-ref="HTTP_Request_configuration_travelOnTip" path="#[vars.resourcePath]">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	"transactionId" : vars.transactionId
+}]]]></http:headers>
+				</http:request>
+					<logger level="INFO" doc:name="cache log" doc:id="5255f9a2-5a50-4005-bb91-d2f385a80416" message="logger inside the cache" />
+				</ee:cache>
+	</sub-flow>
+	<sub-flow name="getRoutes-FastGo" doc:id="92ca79c4-974e-4408-859b-fbc6728a15e3" >
+		<set-variable value="#[&quot;/api/&quot; ++ (vars.transportType default &quot;Bus&quot;) ++ p('http.requester.travelOnTip.routesPath')]" doc:name="system path" doc:id="17d8a872-99a6-40b7-9d8c-93eb88e77b68" variableName="resourcePath" />
+		<ee:cache doc:name="Cache" doc:id="7c6f8158-1066-49f1-b118-9119a3392718" cachingStrategy-ref="Caching_Strategy">
+						<http:request method="GET" doc:name="Request to System" doc:id="e98f0b8e-a71e-4ccb-abbb-73e38316fb3c" config-ref="HTTP_Request_configuration_travelOnTip" path="#[vars.resourcePath]">
+							<http:headers><![CDATA[#[output application/java
+---
+{
+	"transactionId" : vars.transactionId
+}]]]></http:headers>
+						</http:request>
+						<logger level="INFO" doc:name="cache log" doc:id="e784cf07-a536-44fa-a1e0-466a03fd229a" message="logger inside the cache" />
+					</ee:cache>
+	</sub-flow>
+	<sub-flow name="travelOnTrip-Routes-ImplSub_Flow" doc:id="d7c58ef2-f947-49a1-81f4-6da18cbe9eb8" >
+		<choice doc:name="Choice" doc:id="7ef4c333-1c63-4988-8528-93fee4f8859b" >
+			<when expression="#[vars.transportCompany == 'fastGo']">
+				<flow-ref doc:name="call to impl flow" doc:id="7c100036-f081-4bbb-898b-9b5ecedb374c" name="getRoutes-FastGo" />
+			</when>
+			<when expression="#[vars.transportCompany == 'travelOnTip']">
+				<flow-ref doc:name="call to impl flow" doc:id="cb565b27-0896-4632-a9e2-4566404bb122" name="getRoutes-TravelOnTip" />
+			</when>
+			<otherwise >
+				<scatter-gather doc:name="Scatter-Gather" doc:id="7f818691-26d0-4a24-aac3-42167c6aa01b" >
+					<route >
+						<set-variable value="travelOnTip" doc:name="transportCompany" doc:id="f8ebbaf8-9a71-4143-a29b-2a3ec66ca71e" variableName="transportCompany"/>
+						<flow-ref doc:name="call to impl flow" doc:id="cb9123f7-9055-4425-82ad-1b65ca0c46bc" name="getRoutes-FastGo"/>
+					</route>
+					<route >
+						<set-variable value="travelOnTip" doc:name="transportCompany" doc:id="2bf1dcb5-de31-40e5-b485-51cb5f791d1c" variableName="transportCompany"/>
+						<flow-ref doc:name="call to impl flow" doc:id="df79024f-364e-4b10-8739-4f7870832828" name="getRoutes-TravelOnTip" />
+					</route>
+				</scatter-gather>
+				<logger level="INFO" doc:name="impl flow ended" doc:id="1a643c00-5760-4694-b36e-cfd77673ade7" message="#[(payload.'0'.payload default []) ++ (payload.'1'.payload default [])]"/>
+				<set-payload value="#[%dw 2.0&#10;output applicatio/json&#10;---&#10;&#10;(payload.'0'.payload default []) ++ (payload.'1'.payload default [])]" doc:name="response JSON" doc:id="62906328-358c-4c86-b00e-6a715d33084b" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>

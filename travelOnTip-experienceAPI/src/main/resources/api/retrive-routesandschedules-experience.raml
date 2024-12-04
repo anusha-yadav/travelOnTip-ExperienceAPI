@@ -1,0 +1,140 @@
+#%RAML 1.0
+title: Retrive-RoutesAndSchedules-Experience
+
+types:
+  newtype:
+    type: string
+description: This RAML file will retrive consolidated Routes and Schedules
+
+uses:
+  common: /Libraries/Common/Common-HeadersLibrary.raml
+
+/booking:
+  /{transportType}:
+    /routes:
+      get:
+        is: common.transactionId
+        headers:
+          transactionId:
+            required: true
+            type: string
+            example: "geydeb-63grbe7-bfy3y36"
+        queryParameters:
+          companyName : 
+            required: false
+            type: string
+          departureLocation:
+            required: false
+            type: string
+          destinationLocation:
+            required: false
+            type: newtype
+        responses:
+          200:
+            body:
+                application/json:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      companyCode:
+                        type: string
+                        required: true
+                      originalLocation:
+                        type: object 
+                        properties:
+                          locationCode:
+                            type: string
+                            required: true
+                          locationDesc:
+                            type: string
+                            required: true
+                      destinationLocation:
+                        type: object 
+                        properties:
+                          locationCode:
+                            type: string
+                            required: true
+                          locationDesc:
+                            type: string
+                            required: true
+          400:
+            body:
+              application/json:
+                type: object
+                properties:
+                  status: 
+                     type: number
+                     required: true
+                  message:
+                    type: string
+                    required: true
+    /schedules:
+      get:
+        headers:
+          transactionId:
+            required: true
+            type: string
+            example: "geydeb-63grbe7-bfy3y36"
+        queryParameters:
+          companyName : 
+            required: false
+            type: string
+          departureLocation:
+            required: false
+            type: string
+          destinationLocation:
+            type: string
+            required: false
+          requestTimeZone:
+            type: string
+            required: false
+        responses:
+          200:
+            body:
+                application/json:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      companyCode:
+                        type: string
+                        required: true
+                      availableSeats:
+                        type: number
+                        required: true
+                      departureDateTime:
+                        type: string
+                        required: true
+                      travelRoute:
+                        type: object 
+                        properties:
+                          destinationLocation:
+                            type: object
+                            properties: 
+                              locationCode:
+                                type: string
+                                required: true
+                              locationDesc:
+                                type: string
+                                required: true
+                              originLocation:
+                                type: object 
+                                properties:
+                                  locationCode:
+                                    type: string
+                                    required: true
+                                  locationDesc:
+                                    type: string
+                                    required: true
+          400:
+            body:
+              application/json:
+                type: object
+                properties:
+                  status: 
+                     type: number
+                     required: true
+                  message:
+                    type: string
+                    required: true

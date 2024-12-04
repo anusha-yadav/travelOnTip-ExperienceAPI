@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_92ca79c4_974e_4408_859b_fbc6728a15e3_Input_Variables_departureLocation = Any
+
