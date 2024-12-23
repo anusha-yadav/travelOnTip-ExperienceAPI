@@ -5,7 +5,6 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy" doc:id="46077c99-e778-4469-ad63-752c36bf55a5" objectStore="Object_store" keyGenerationExpression='#[vars.transportCompany ++ vars.transportType ++ "Routes"]'/>
 	<sub-flow name="getRoutes-TravelOnTip" doc:id="63770fc3-ffcb-4efa-afc2-5ee99cfad01f" >
 		<set-variable value="#[&quot;/api/&quot; ++ (vars.transportType default &quot;Bus&quot;) ++ p('http.requester.travelOnTip.routesPath')]" doc:name="system path" doc:id="93a8bfc9-86d9-46dd-94bb-d7f69847c7df" variableName="resourcePath" />
 		<ee:cache doc:name="Cache" doc:id="839062ce-1e23-41f7-b59a-103c55495819" cachingStrategy-ref="Caching_Strategy">
@@ -16,7 +15,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	"transactionId" : vars.transactionId
 }]]]></http:headers>
 				</http:request>
-					<logger level="INFO" doc:name="cache log" doc:id="5255f9a2-5a50-4005-bb91-d2f385a80416" message="logger inside the cache" />
+			<logger level="INFO" doc:name="cache log" doc:id="5255f9a2-5a50-4005-bb91-d2f385a80416" message="logger inside the cache for transaction id #[vars.transactionId]" />
 				</ee:cache>
 	</sub-flow>
 	<sub-flow name="getRoutes-FastGo" doc:id="92ca79c4-974e-4408-859b-fbc6728a15e3" >
@@ -29,7 +28,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	"transactionId" : vars.transactionId
 }]]]></http:headers>
 						</http:request>
-						<logger level="INFO" doc:name="cache log" doc:id="e784cf07-a536-44fa-a1e0-466a03fd229a" message="logger inside the cache" />
+			<logger level="INFO" doc:name="cache log" doc:id="e784cf07-a536-44fa-a1e0-466a03fd229a" message="logger inside the cache for transaction id #[vars.transactionId]" />
 					</ee:cache>
 	</sub-flow>
 	<sub-flow name="travelOnTrip-Routes-ImplSub_Flow" doc:id="d7c58ef2-f947-49a1-81f4-6da18cbe9eb8" >
@@ -41,6 +40,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<flow-ref doc:name="call to impl flow" doc:id="cb565b27-0896-4632-a9e2-4566404bb122" name="getRoutes-TravelOnTip" />
 			</when>
 			<otherwise >
+				<logger level="INFO" doc:name="Impl flow started" doc:id="04964e1c-556e-4788-8161-b521039819a3" message="In impl flow for transaction id #[vars.transactionId]"/>
 				<scatter-gather doc:name="Scatter-Gather" doc:id="7f818691-26d0-4a24-aac3-42167c6aa01b" >
 					<route >
 						<set-variable value="travelOnTip" doc:name="transportCompany" doc:id="f8ebbaf8-9a71-4143-a29b-2a3ec66ca71e" variableName="transportCompany"/>

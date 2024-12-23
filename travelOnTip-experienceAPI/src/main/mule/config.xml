@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="retrive-routesandschedules-experience-httpListenerConfig">	
+    <http:listener-connection host="${http.listner.host}" port="${http.listner.port}" readTimeout="120000"/>
+    </http:listener-config>
+    <ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy" doc:id="1198bff3-a271-4361-8dbb-774b3e469bc7" objectStore="Object_store" keyGenerationExpression='#[vars.transportCompany ++ vars.transportType ++ "Routes"]'/>
+    
+    <apikit:config name="retrive-routesandschedules-experience-config" api="retrive-routesandschedules-experience.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<http:request-config name="HTTP_Request_configuration_travelOnTip" doc:name="HTTP Request configuration" doc:id="288921a0-625b-43e5-971d-068815e6b04c" >
+		<http:request-connection host="${http.requester.travelOnTip.host}" port="${http.requester.travelOnTip.port}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration_fastGo" doc:name="HTTP Request configuration" doc:id="53aaa690-8a1d-4783-acff-8cfd44537a9e" >
+		<http:request-connection host="${http.requester.fastGo.host}" port="${http.requester.fastGo.port}" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="eb86b057-177e-43f5-bbb1-2b7494b2b808" file="Config\local.yaml" />
+	<global-property doc:name="Global Property" doc:id="3a176656-9a93-4d50-ae01-427ee150a18b" name="env" value="local" />
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="862407aa-9ffe-4763-9dfb-b9d8e91032a8" maxEntries="1000" entryTtl="15" entryTtlUnit="MINUTES" expirationInterval="10" />
+	<configuration doc:name="Configuration" doc:id="bee9bcd9-5715-42f2-9884-a23f25815026" defaultErrorHandler-ref="errorHandlerError_Handler" />
+</mule>

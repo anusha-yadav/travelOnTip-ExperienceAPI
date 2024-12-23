@@ -14,11 +14,6 @@ uses:
     /routes:
       get:
         is: common.transactionId
-        headers:
-          transactionId:
-            required: true
-            type: string
-            example: "geydeb-63grbe7-bfy3y36"
         queryParameters:
           companyName : 
             required: false
@@ -28,7 +23,7 @@ uses:
             type: string
           destinationLocation:
             required: false
-            type: newtype
+            type: string
         responses:
           200:
             body:
@@ -71,11 +66,7 @@ uses:
                     required: true
     /schedules:
       get:
-        headers:
-          transactionId:
-            required: true
-            type: string
-            example: "geydeb-63grbe7-bfy3y36"
+        is: common.transactionId
         queryParameters:
           companyName : 
             required: false
